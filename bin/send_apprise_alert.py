@@ -1,39 +1,54 @@
 import sys, requests, json, re, os
+import logging, logging.handlers
+import splunk
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "lib"))
 import apprise
 
+def setup_logging():
+    logger = logging.getLogger('splunk.apprise')    
+    SPLUNK_HOME = os.environ['SPLUNK_HOME']
+    
+    LOGGING_DEFAULT_CONFIG_FILE = os.path.join(SPLUNK_HOME, 'etc', 'log.cfg')
+    LOGGING_LOCAL_CONFIG_FILE = os.path.join(SPLUNK_HOME, 'etc', 'log-local.cfg')
+    LOGGING_STANZA_NAME = 'python'
+    LOGGING_FILE_NAME = "apprise.log"
+    BASE_LOG_PATH = os.path.join('var', 'log', 'splunk')
+    LOGGING_FORMAT = "%(asctime)s %(levelname)-s\t%(module)s:%(lineno)d - %(message)s"
+    splunk_log_handler = logging.handlers.RotatingFileHandler(os.path.join(SPLUNK_HOME, BASE_LOG_PATH, LOGGING_FILE_NAME), mode='a') 
+    splunk_log_handler.setFormatter(logging.Formatter(LOGGING_FORMAT))
+    logger.addHandler(splunk_log_handler)
+    splunk.setupSplunkLogger(logger, LOGGING_DEFAULT_CONFIG_FILE, LOGGING_LOCAL_CONFIG_FILE, LOGGING_STANZA_NAME)
+    return logger
 
-def eprint(*args, **kwargs):
-    print(*args, file=sys.stderr, **kwargs)
-
-def check_inputs(config):
+def check_inputs(config, logger):
     required_fields = ['body']
     
     if not 'url' in config and not 'tag' in config:
-        eprint("A URL or tag needs to be specified.")
+        logger.error("A URL or tag needs to be specified.")
         return False
 
     if 'tag' in config and not 'config' in config:
-        eprint("Using a tag requires setting a configuration file defined in setup.")
+        logger.error("Using a tag requires setting a configuration file defined in setup.")
         return False
     
     if 'tag' in config and 'config' in config:
         if not os.path.exists(config['config']):
-            eprint("Unable to locate config file {}".format(config['config']))
+            logger.error("Unable to locate config file {}".format(config['config']))
             return False
 
     for field in required_fields:
         if not field in config:
-            eprint("No "+field+" specified.")
+            logger.error("No "+field+" specified.")
             return False
         
     return True
 
 
 if len(sys.argv) > 1 and sys.argv[1] == "--execute":
+    logger = setup_logging()
     alert = json.load(sys.stdin)
-    if check_inputs(alert['configuration']):
+    if check_inputs(alert['configuration'], logger):
         #load config
         config = alert['configuration']
         
@@ -56,9 +71,7 @@ if len(sys.argv) > 1 and sys.argv[1] == "--execute":
                     body=config['body'],
                     tag=config['tag']
                 )
-
-
-        if 'url' in config:
+        elif 'url' in config:
             ar = apprise.Apprise()
             ar.add(config['url'])
 
@@ -73,6 +86,6 @@ if len(sys.argv) > 1 and sys.argv[1] == "--execute":
                 )
 
     else:
-        eprint("Invalid configuration detected. Stopped.")
+        logger.error("Invalid configuration detected. Stopped.")
 else:
-    eprint("FATAL No execute flag given")
+    print("FATAL No execute flag given")
