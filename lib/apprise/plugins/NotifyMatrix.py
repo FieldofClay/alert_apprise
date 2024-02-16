@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -471,7 +471,7 @@ class NotifyMatrix(NotifyBase):
 
             # Iterate over above list and store content accordingly
             self._re_slack_formatting_rules = re.compile(
-                r'(' + '|'.join(self._re_slack_formatting_map.keys()) + r')',
+                r'(' + '|'.join(list(self._re_slack_formatting_map.keys())) + r')',
                 re.IGNORECASE,
             )
 
@@ -727,28 +727,38 @@ class NotifyMatrix(NotifyBase):
             #     "content_uri": "mxc://example.com/a-unique-key"
             # }
 
-            if self.version == MatrixVersion.V3:
-                # Prepare our payload
-                payloads.append({
-                    "body": attachment.name,
-                    "info": {
-                        "mimetype": attachment.mimetype,
-                        "size": len(attachment),
-                    },
-                    "msgtype": "m.image",
-                    "url": response.get('content_uri'),
-                })
+            # FUTURE if self.version == MatrixVersion.V3:
+            # FUTURE     # Prepare our payload
+            # FUTURE     payloads.append({
+            # FUTURE         "body": attachment.name,
+            # FUTURE         "info": {
+            # FUTURE             "mimetype": attachment.mimetype,
+            # FUTURE             "size": len(attachment),
+            # FUTURE         },
+            # FUTURE         "msgtype": "m.image",
+            # FUTURE         "url": response.get('content_uri'),
+            # FUTURE     })
 
-            else:
-                # Prepare our payload
-                payloads.append({
-                    "info": {
-                        "mimetype": attachment.mimetype,
-                    },
-                    "msgtype": "m.image",
-                    "body": "tta.webp",
-                    "url": response.get('content_uri'),
-                })
+            # FUTURE else:
+            # FUTURE     # Prepare our payload
+            # FUTURE     payloads.append({
+            # FUTURE         "info": {
+            # FUTURE             "mimetype": attachment.mimetype,
+            # FUTURE         },
+            # FUTURE         "msgtype": "m.image",
+            # FUTURE         "body": "tta.webp",
+            # FUTURE         "url": response.get('content_uri'),
+            # FUTURE     })
+
+            # Prepare our payload
+            payloads.append({
+                "info": {
+                    "mimetype": attachment.mimetype,
+                },
+                "msgtype": "m.image",
+                "body": "tta.webp",
+                "url": response.get('content_uri'),
+            })
 
         return payloads
 
@@ -875,7 +885,7 @@ class NotifyMatrix(NotifyBase):
             #
             # In this case it's okay to safely return True because
             # we're logged out in this case.
-            if response.get('errcode') != u'M_UNKNOWN_TOKEN':
+            if response.get('errcode') != 'M_UNKNOWN_TOKEN':
                 return False
 
         # else: The response object looks like this if we were successful:
@@ -1131,11 +1141,12 @@ class NotifyMatrix(NotifyBase):
                 or self.port == default_port else f':{self.port}')
 
         if path == '/upload':
-            if self.version == MatrixVersion.V3:
-                url += MATRIX_V3_MEDIA_PATH + path
+            # FUTURE if self.version == MatrixVersion.V3:
+            # FUTURE     url += MATRIX_V3_MEDIA_PATH + path
 
-            else:
-                url += MATRIX_V2_MEDIA_PATH + path
+            # FUTURE else:
+            # FUTURE     url += MATRIX_V2_MEDIA_PATH + path
+            url += MATRIX_V2_MEDIA_PATH + path
 
             params = {'filename': attachment.name}
             with open(attachment.path, 'rb') as fp:

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -323,17 +323,17 @@ class NotifyPagerTree(NotifyBase):
 
         # Headers prefixed with a '+' sign
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Meta: {} prefixed with a '-' sign
         # Append our meta extras into our parameters
         params.update(
-            {'-{}'.format(k): v for k, v in self.meta_extras.items()})
+            {'-{}'.format(k): v for k, v in list(self.meta_extras.items())})
 
         # Payload body extras prefixed with a ':' sign
         # Append our payload extras into our parameters
         params.update(
-            {':{}'.format(k): v for k, v in self.payload_extras.items()})
+            {':{}'.format(k): v for k, v in list(self.payload_extras.items())})
 
         return '{schema}://{integration}?{params}'.format(
             schema=self.secure_protocol,
@@ -359,19 +359,19 @@ class NotifyPagerTree(NotifyBase):
         # to to our returned result set and tidy entries by unquoting them
         results['headers'] = {
             NotifyPagerTree.unquote(x): NotifyPagerTree.unquote(y)
-            for x, y in results['qsd+'].items()
+            for x, y in list(results['qsd+'].items())
         }
 
         # store any additional payload extra's defined
         results['payload_extras'] = {
             NotifyPagerTree.unquote(x): NotifyPagerTree.unquote(y)
-            for x, y in results['qsd:'].items()
+            for x, y in list(results['qsd:'].items())
         }
 
         # store any additional meta extra's defined
         results['meta_extras'] = {
             NotifyPagerTree.unquote(x): NotifyPagerTree.unquote(y)
-            for x, y in results['qsd-'].items()
+            for x, y in list(results['qsd-'].items())
         }
 
         # Integration ID

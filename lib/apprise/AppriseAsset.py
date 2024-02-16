@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -33,7 +33,11 @@ from os.path import dirname
 from os.path import isfile
 from os.path import abspath
 from .common import NotifyType
-from .utils import module_detection
+from .NotificationManager import NotificationManager
+
+
+# Grant access to our Notification Manager Singleton
+N_MGR = NotificationManager()
 
 
 class AppriseAsset:
@@ -121,6 +125,12 @@ class AppriseAsset:
     # notifications are sent sequentially (one after another)
     async_mode = True
 
+    # Support :smile:, and other alike keywords swapping them for their
+    # unicode value. A value of None leaves the interpretation up to the
+    # end user to control (allowing them to specify emojis=yes on the
+    # URL)
+    interpret_emojis = None
+
     # Whether or not to interpret escapes found within the input text prior
     # to passing it upstream. Such as converting \t to an actual tab and \n
     # to a new line.
@@ -164,7 +174,7 @@ class AppriseAsset:
 
         """
         # Assign default arguments if specified
-        for key, value in kwargs.items():
+        for key, value in list(kwargs.items()):
             if not hasattr(AppriseAsset, key):
                 raise AttributeError(
                     'AppriseAsset init(): '
@@ -174,7 +184,7 @@ class AppriseAsset:
 
         if plugin_paths:
             # Load any decorated modules if defined
-            module_detection(plugin_paths)
+            N_MGR.module_detection(plugin_paths)
 
     def color(self, notify_type, color_type=None):
         """
@@ -242,7 +252,7 @@ class AppriseAsset:
 
         # Iterate over above list and store content accordingly
         re_table = re.compile(
-            r'(' + '|'.join(re_map.keys()) + r')',
+            r'(' + '|'.join(list(re_map.keys())) + r')',
             re.IGNORECASE,
         )
 
@@ -271,7 +281,7 @@ class AppriseAsset:
 
         # Iterate over above list and store content accordingly
         re_table = re.compile(
-            r'(' + '|'.join(re_map.keys()) + r')',
+            r'(' + '|'.join(list(re_map.keys())) + r')',
             re.IGNORECASE,
         )
 

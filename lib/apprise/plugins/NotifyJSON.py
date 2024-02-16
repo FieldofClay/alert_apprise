@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -209,14 +209,14 @@ class NotifyJSON(NotifyBase):
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Append our GET params into our parameters
-        params.update({'-{}'.format(k): v for k, v in self.params.items()})
+        params.update({'-{}'.format(k): v for k, v in list(self.params.items())})
 
         # Append our payload extra's into our parameters
         params.update(
-            {':{}'.format(k): v for k, v in self.payload_extras.items()})
+            {':{}'.format(k): v for k, v in list(self.payload_extras.items())})
 
         # Determine Authentication
         auth = ''
@@ -299,7 +299,7 @@ class NotifyJSON(NotifyBase):
             JSONPayloadField.MESSAGETYPE: notify_type,
         }
 
-        for key, value in self.payload_extras.items():
+        for key, value in list(self.payload_extras.items()):
 
             if key in payload:
                 if not value:
@@ -409,16 +409,16 @@ class NotifyJSON(NotifyBase):
 
         # store any additional payload extra's defined
         results['payload'] = {NotifyJSON.unquote(x): NotifyJSON.unquote(y)
-                              for x, y in results['qsd:'].items()}
+                              for x, y in list(results['qsd:'].items())}
 
         # Add our headers that the user can potentially over-ride if they wish
         # to to our returned result set and tidy entries by unquoting them
         results['headers'] = {NotifyJSON.unquote(x): NotifyJSON.unquote(y)
-                              for x, y in results['qsd+'].items()}
+                              for x, y in list(results['qsd+'].items())}
 
         # Add our GET paramters in the event the user wants to pass these along
         results['params'] = {NotifyJSON.unquote(x): NotifyJSON.unquote(y)
-                             for x, y in results['qsd-'].items()}
+                             for x, y in list(results['qsd-'].items())}
 
         # Set method if not otherwise set
         if 'method' in results['qsd'] and len(results['qsd']['method']):

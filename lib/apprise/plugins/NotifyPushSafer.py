@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -430,7 +430,7 @@ class NotifyPushSafer(NotifyBase):
             # low, lo, l (for low);
             # normal, norma, norm, nor, no, n (for normal)
             # ... etc
-            match = next((key for key in PUSHSAFER_PRIORITY_MAP.keys()
+            match = next((key for key in list(PUSHSAFER_PRIORITY_MAP.keys())
                          if key.startswith(priority)), None) \
                 if priority else None
 
@@ -445,7 +445,7 @@ class NotifyPushSafer(NotifyBase):
             self.priority = PUSHSAFER_PRIORITY_MAP[match]
 
         if self.priority is not None and \
-                self.priority not in PUSHSAFER_PRIORITY_MAP.values():
+                self.priority not in list(PUSHSAFER_PRIORITY_MAP.values()):
             msg = 'An invalid PushSafer priority ' \
                   '({}) was specified.'.format(priority)
             self.logger.warning(msg)
@@ -472,7 +472,7 @@ class NotifyPushSafer(NotifyBase):
             # This little bit of black magic allows us to match against
             # against multiple versions of the same string
             # ... etc
-            match = next((key for key in PUSHSAFER_SOUND_MAP.keys()
+            match = next((key for key in list(PUSHSAFER_SOUND_MAP.keys())
                          if key.startswith(sound)), None) \
                 if sound else None
 
@@ -487,7 +487,7 @@ class NotifyPushSafer(NotifyBase):
             self.sound = PUSHSAFER_SOUND_MAP[match]
 
         if self.sound is not None and \
-                self.sound not in PUSHSAFER_SOUND_MAP.values():
+                self.sound not in list(PUSHSAFER_SOUND_MAP.values()):
             msg = 'An invalid PushSafer sound ' \
                   '({}) was specified.'.format(sound)
             self.logger.warning(msg)
@@ -767,14 +767,14 @@ class NotifyPushSafer(NotifyBase):
         if self.priority is not None:
             # Store our priority; but only if it was specified
             params['priority'] = \
-                next((key for key, value in PUSHSAFER_PRIORITY_MAP.items()
+                next((key for key, value in list(PUSHSAFER_PRIORITY_MAP.items())
                       if value == self.priority),
                      DEFAULT_PRIORITY)  # pragma: no cover
 
         if self.sound is not None:
             # Store our sound; but only if it was specified
             params['sound'] = \
-                next((key for key, value in PUSHSAFER_SOUND_MAP.items()
+                next((key for key, value in list(PUSHSAFER_SOUND_MAP.items())
                       if value == self.sound), '')  # pragma: no cover
 
         if self.vibration is not None:

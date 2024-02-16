@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -938,7 +938,7 @@ class NotifyLametric(NotifyBase):
                         LAMETRIC_IS_APP_TOKEN.match(results['password'])) and
 
                     # Scan for app_ flags
-                    next((f for f in results.keys() \
+                    next((f for f in list(results.keys()) \
                           if f.startswith('app_')), None) is None) \
                 else LametricMode.CLOUD
 

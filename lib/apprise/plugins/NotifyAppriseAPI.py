@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -203,7 +203,7 @@ class NotifyAppriseAPI(NotifyBase):
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         if self.__tags:
             params['tags'] = ','.join([x for x in self.__tags])
@@ -446,7 +446,7 @@ class NotifyAppriseAPI(NotifyBase):
         # to to our returned result set and tidy entries by unquoting them
         results['headers'] = \
             {NotifyAppriseAPI.unquote(x): NotifyAppriseAPI.unquote(y)
-             for x, y in results['qsd+'].items()}
+             for x, y in list(results['qsd+'].items())}
 
         # Support the passing of tags in the URL
         if 'tags' in results['qsd'] and len(results['qsd']['tags']):

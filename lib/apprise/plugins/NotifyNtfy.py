@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -349,7 +349,7 @@ class NotifyNtfy(NotifyBase):
         self.priority = NotifyNtfy.template_args['priority']['default'] \
             if not priority else \
             next((
-                v for k, v in NTFY_PRIORITY_MAP.items()
+                v for k, v in list(NTFY_PRIORITY_MAP.items())
                 if str(priority).lower().startswith(k)),
                 NotifyNtfy.template_args['priority']['default'])
 

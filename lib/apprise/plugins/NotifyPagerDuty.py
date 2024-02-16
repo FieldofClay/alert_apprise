@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -356,7 +356,7 @@ class NotifyPagerDuty(NotifyBase):
         if self.details:
             payload['payload']['custom_details'] = {}
             # Apply any provided custom details
-            for k, v in self.details.items():
+            for k, v in list(self.details.items()):
                 payload['payload']['custom_details'][k] = v
 
         # Prepare our URL based on region
@@ -435,7 +435,7 @@ class NotifyPagerDuty(NotifyBase):
             params['severity'] = self.severity
 
         # Append our custom entries our parameters
-        params.update({'+{}'.format(k): v for k, v in self.details.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.details.items())})
 
         # Extend our parameters
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
@@ -524,7 +524,7 @@ class NotifyPagerDuty(NotifyBase):
         # entries by unquoting them
         results['details'] = {
             NotifyPagerDuty.unquote(x): NotifyPagerDuty.unquote(y)
-            for x, y in results['qsd+'].items()}
+            for x, y in list(results['qsd+'].items())}
 
         if 'region' in results['qsd'] and len(results['qsd']['region']):
             # Extract from name to associate with from address

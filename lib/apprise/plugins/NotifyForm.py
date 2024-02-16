@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -286,16 +286,16 @@ class NotifyForm(NotifyBase):
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Append our GET params into our parameters
-        params.update({'-{}'.format(k): v for k, v in self.params.items()})
+        params.update({'-{}'.format(k): v for k, v in list(self.params.items())})
 
         # Append our payload extra's into our parameters
         params.update(
-            {':{}'.format(k): v for k, v in self.payload_extras.items()})
+            {':{}'.format(k): v for k, v in list(self.payload_extras.items())})
         params.update(
-            {':{}'.format(k): v for k, v in self.payload_overrides.items()})
+            {':{}'.format(k): v for k, v in list(self.payload_overrides.items())})
 
         if self.attach_as != self.attach_as_default:
             # Provide Attach-As extension details
@@ -500,16 +500,16 @@ class NotifyForm(NotifyBase):
 
         # store any additional payload extra's defined
         results['payload'] = {NotifyForm.unquote(x): NotifyForm.unquote(y)
-                              for x, y in results['qsd:'].items()}
+                              for x, y in list(results['qsd:'].items())}
 
         # Add our headers that the user can potentially over-ride if they wish
         # to to our returned result set and tidy entries by unquoting them
         results['headers'] = {NotifyForm.unquote(x): NotifyForm.unquote(y)
-                              for x, y in results['qsd+'].items()}
+                              for x, y in list(results['qsd+'].items())}
 
         # Add our GET paramters in the event the user wants to pass these along
         results['params'] = {NotifyForm.unquote(x): NotifyForm.unquote(y)
-                             for x, y in results['qsd-'].items()}
+                             for x, y in list(results['qsd-'].items())}
 
         # Allow Attach-As Support which over-rides the name of the filename
         # posted with the form://

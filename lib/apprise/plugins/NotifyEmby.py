@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -505,7 +505,7 @@ class NotifyEmby(NotifyBase):
             return False
 
         # Acquire our list of sessions
-        sessions = self.sessions().keys()
+        sessions = list(self.sessions().keys())
         if not sessions:
             self.logger.warning('There were no Emby sessions to notify.')
             # We don't need to fail; there really is no one to notify

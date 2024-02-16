@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -217,7 +217,7 @@ class NotifyXML(NotifyBase):
         if payload:
             # Store our extra payload entries (but tidy them up since they will
             # become XML Keys (they can't contain certain characters
-            for k, v in payload.items():
+            for k, v in list(payload.items()):
                 key = re.sub(r'[^A-Za-z0-9_-]*', '', k)
                 if not key:
                     self.logger.warning(
@@ -256,16 +256,16 @@ class NotifyXML(NotifyBase):
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Append our GET params into our parameters
-        params.update({'-{}'.format(k): v for k, v in self.params.items()})
+        params.update({'-{}'.format(k): v for k, v in list(self.params.items())})
 
         # Append our payload extra's into our parameters
         params.update(
-            {':{}'.format(k): v for k, v in self.payload_extras.items()})
+            {':{}'.format(k): v for k, v in list(self.payload_extras.items())})
         params.update(
-            {':{}'.format(k): v for k, v in self.payload_overrides.items()})
+            {':{}'.format(k): v for k, v in list(self.payload_overrides.items())})
 
         # Determine Authentication
         auth = ''
@@ -331,11 +331,11 @@ class NotifyXML(NotifyBase):
         # Apply our payload extras
         payload_base.update(
             {k: NotifyXML.escape_html(v, whitespace=False)
-                for k, v in self.payload_extras.items()})
+                for k, v in list(self.payload_extras.items())})
 
         # Base Entres
         xml_base = ''.join(
-            ['<{}>{}</{}>'.format(k, v, k) for k, v in payload_base.items()])
+            ['<{}>{}</{}>'.format(k, v, k) for k, v in list(payload_base.items())])
 
         attachments = []
         if attach and self.attachment_support:
@@ -382,7 +382,7 @@ class NotifyXML(NotifyBase):
 
         # Iterate over above list and store content accordingly
         re_table = re.compile(
-            r'(' + '|'.join(re_map.keys()) + r')',
+            r'(' + '|'.join(list(re_map.keys())) + r')',
             re.IGNORECASE,
         )
 
@@ -481,16 +481,16 @@ class NotifyXML(NotifyBase):
 
         # store any additional payload extra's defined
         results['payload'] = {NotifyXML.unquote(x): NotifyXML.unquote(y)
-                              for x, y in results['qsd:'].items()}
+                              for x, y in list(results['qsd:'].items())}
 
         # Add our headers that the user can potentially over-ride if they wish
         # to to our returned result set and tidy entries by unquoting them
         results['headers'] = {NotifyXML.unquote(x): NotifyXML.unquote(y)
-                              for x, y in results['qsd+'].items()}
+                              for x, y in list(results['qsd+'].items())}
 
         # Add our GET paramters in the event the user wants to pass these along
         results['params'] = {NotifyXML.unquote(x): NotifyXML.unquote(y)
-                             for x, y in results['qsd-'].items()}
+                             for x, y in list(results['qsd-'].items())}
 
         # Set method if not otherwise set
         if 'method' in results['qsd'] and len(results['qsd']['method']):

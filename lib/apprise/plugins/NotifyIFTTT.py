@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -209,7 +209,7 @@ class NotifyIFTTT(NotifyBase):
 
         # Eliminate fields flagged for removal otherwise ensure all tokens are
         # lowercase since that is what the IFTTT server expects from us.
-        payload = {x.lower(): y for x, y in payload.items()
+        payload = {x.lower(): y for x, y in list(payload.items())
                    if x not in self.del_tokens}
 
         # error tracking (used for function return)
@@ -246,9 +246,9 @@ class NotifyIFTTT(NotifyBase):
                     timeout=self.request_timeout,
                 )
                 self.logger.debug(
-                    u"IFTTT HTTP response headers: %r" % r.headers)
+                    "IFTTT HTTP response headers: %r" % r.headers)
                 self.logger.debug(
-                    u"IFTTT HTTP response body: %r" % r.content)
+                    "IFTTT HTTP response body: %r" % r.content)
 
                 if r.status_code != requests.codes.ok:
                     # We had a problem

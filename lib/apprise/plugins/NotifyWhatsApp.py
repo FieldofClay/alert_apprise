@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -241,7 +241,7 @@ class NotifyWhatsApp(NotifyBase):
         # Validate Mapping and prepare Components
         self.components = dict()
         self.component_keys = list()
-        for key, val in self.template_mapping.items():
+        for key, val in list(self.template_mapping.items()):
             matched = self.component_key_re.match(key)
             if not matched:
                 msg = 'An invalid Template Component ID ' \
@@ -276,7 +276,7 @@ class NotifyWhatsApp(NotifyBase):
                 raise TypeError(msg)
 
             self.components[index] = map_to
-            self.component_keys = self.components.keys()
+            self.component_keys = list(self.components.keys())
             # Adjust sorting and assume that the user put the order correctly;
             # if not Facebook just won't be very happy and will reject the
             # message
@@ -463,7 +463,7 @@ class NotifyWhatsApp(NotifyBase):
         # Payload body extras prefixed with a ':' sign
         # Append our payload extras into our parameters
         params.update(
-            {':{}'.format(k): v for k, v in self.template_mapping.items()})
+            {':{}'.format(k): v for k, v in list(self.template_mapping.items())})
 
         return '{schema}://{template}{token}@{from_id}/{targets}/?{params}'\
             .format(
@@ -553,7 +553,7 @@ class NotifyWhatsApp(NotifyBase):
         # store any additional payload extra's defined
         results['template_mapping'] = {
             NotifyWhatsApp.unquote(x): NotifyWhatsApp.unquote(y)
-            for x, y in results['qsd:'].items()
+            for x, y in list(results['qsd:'].items())
         }
 
         return results

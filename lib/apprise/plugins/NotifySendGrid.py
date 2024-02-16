@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -265,7 +265,7 @@ class NotifySendGrid(NotifyBase):
 
         # Append our template_data into our parameter list
         params.update(
-            {'+{}'.format(k): v for k, v in self.template_data.items()})
+            {'+{}'.format(k): v for k, v in list(self.template_data.items())})
 
         # a simple boolean check as to whether we display our target emails
         # or not
@@ -327,7 +327,7 @@ class NotifySendGrid(NotifyBase):
 
             if self.template_data:
                 _payload['personalizations'][0]['dynamic_template_data'] = \
-                    {k: v for k, v in self.template_data.items()}
+                    {k: v for k, v in list(self.template_data.items())}
 
         targets = list(self.targets)
         while len(targets) > 0:

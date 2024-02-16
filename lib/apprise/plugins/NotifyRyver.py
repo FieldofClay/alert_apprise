@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -179,7 +179,7 @@ class NotifyRyver(NotifyBase):
 
         # Iterate over above list and store content accordingly
         self._re_formatting_rules = re.compile(
-            r'(' + '|'.join(self._re_formatting_map.keys()) + r')',
+            r'(' + '|'.join(list(self._re_formatting_map.keys())) + r')',
             re.IGNORECASE,
         )
 

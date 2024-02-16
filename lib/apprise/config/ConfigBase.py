@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -35,15 +35,23 @@ from .. import plugins
 from .. import common
 from ..AppriseAsset import AppriseAsset
 from ..URLBase import URLBase
+from ..ConfigurationManager import ConfigurationManager
 from ..utils import GET_SCHEMA_RE
 from ..utils import parse_list
 from ..utils import parse_bool
 from ..utils import parse_urls
 from ..utils import cwe312_url
+from ..NotificationManager import NotificationManager
 
 # Test whether token is valid or not
 VALID_TOKEN = re.compile(
     r'(?P<token>[a-z0-9][a-z0-9_]+)', re.I)
+
+# Grant access to our Notification Manager Singleton
+N_MGR = NotificationManager()
+
+# Grant access to our Configuration Manager Singleton
+C_MGR = ConfigurationManager()
 
 
 class ConfigBase(URLBase):
@@ -229,7 +237,7 @@ class ConfigBase(URLBase):
                     schema = schema.group('schema').lower()
 
                     # Some basic validation
-                    if schema not in common.CONFIG_SCHEMA_MAP:
+                    if schema not in C_MGR:
                         ConfigBase.logger.warning(
                             'Unsupported include schema {}.'.format(schema))
                         continue
@@ -240,7 +248,7 @@ class ConfigBase(URLBase):
 
                 # Parse our url details of the server object as dictionary
                 # containing all of the information parsed from our URL
-                results = common.CONFIG_SCHEMA_MAP[schema].parse_url(url)
+                results = C_MGR[schema].parse_url(url)
                 if not results:
                     # Failed to parse the server URL
                     self.logger.warning(
@@ -248,11 +256,10 @@ class ConfigBase(URLBase):
                     continue
 
                 # Handle cross inclusion based on allow_cross_includes rules
-                if (common.CONFIG_SCHEMA_MAP[schema].allow_cross_includes ==
+                if (C_MGR[schema].allow_cross_includes ==
                         common.ContentIncludeMode.STRICT
                         and schema not in self.schemas()
-                        and not self.insecure_includes) or \
-                        common.CONFIG_SCHEMA_MAP[schema] \
+                        and not self.insecure_includes) or C_MGR[schema] \
                         .allow_cross_includes == \
                         common.ContentIncludeMode.NEVER:
 
@@ -280,8 +287,7 @@ class ConfigBase(URLBase):
                 try:
                     # Attempt to create an instance of our plugin using the
                     # parsed URL information
-                    cfg_plugin = \
-                        common.CONFIG_SCHEMA_MAP[results['schema']](**results)
+                    cfg_plugin = C_MGR[results['schema']](**results)
 
                 except Exception as e:
                     # the arguments are invalid or can not be used.
@@ -370,7 +376,7 @@ class ConfigBase(URLBase):
 
         """
         # Prepare a key set list we can use
-        tag_groups = set([str(x) for x in group_tags.keys()])
+        tag_groups = set([str(x) for x in list(group_tags.keys())])
 
         def _expand(tags, ignore=None):
             """
@@ -393,7 +399,11 @@ class ConfigBase(URLBase):
                 # Track our groups
                 groups.add(tag)
 
-                # Store what we know is worth keping
+                # Store what we know is worth keeping
+                if tag not in group_tags:  # pragma: no cover
+                    # handle cases where the tag doesn't exist
+                    group_tags[tag] = set()
+
                 results |= group_tags[tag] - tag_groups
 
                 # Get simple tag assignments
@@ -751,7 +761,7 @@ class ConfigBase(URLBase):
             #
             # Apply our tag groups if they're defined
             #
-            for group, tags in group_tags.items():
+            for group, tags in list(group_tags.items()):
                 # Detect if anything assigned to this tag also maps back to a
                 # group.  If so we want to add the group to our list
                 if next((True for tag in results['tag']
@@ -761,8 +771,7 @@ class ConfigBase(URLBase):
             try:
                 # Attempt to create an instance of our plugin using the
                 # parsed URL information
-                plugin = common.NOTIFY_SCHEMA_MAP[
-                    results['schema']](**results)
+                plugin = N_MGR[results['schema']](**results)
 
                 # Create log entry of loaded URL
                 ConfigBase.logger.debug(
@@ -845,7 +854,7 @@ class ConfigBase(URLBase):
         asset = asset if isinstance(asset, AppriseAsset) else AppriseAsset()
         tokens = result.get('asset', None)
         if tokens and isinstance(tokens, dict):
-            for k, v in tokens.items():
+            for k, v in list(tokens.items()):
 
                 if k.startswith('_') or k.endswith('_'):
                     # Entries are considered reserved if they start or end
@@ -898,19 +907,11 @@ class ConfigBase(URLBase):
         # groups root directive
         #
         groups = result.get('groups', None)
-        if not isinstance(groups, (list, tuple)):
-            # Not a problem; we simply have no group entry
-            groups = list()
-
-        # Iterate over each group defined and store it
-        for no, entry in enumerate(groups):
-            if not isinstance(entry, dict):
-                ConfigBase.logger.warning(
-                    'No assignment for group {}, entry #{}'.format(
-                        entry, no + 1))
-                continue
-
-            for _groups, tags in entry.items():
+        if isinstance(groups, dict):
+            #
+            # Dictionary
+            #
+            for _groups, tags in list(groups.items()):
                 for group in parse_list(_groups, cast=str):
                     if isinstance(tags, (list, tuple)):
                         _tags = set()
@@ -932,7 +933,41 @@ class ConfigBase(URLBase):
                     else:
                         group_tags[group] |= tags
 
-        #
+        elif isinstance(groups, (list, tuple)):
+            #
+            # List of Dictionaries
+            #
+
+            # Iterate over each group defined and store it
+            for no, entry in enumerate(groups):
+                if not isinstance(entry, dict):
+                    ConfigBase.logger.warning(
+                        'No assignment for group {}, entry #{}'.format(
+                            entry, no + 1))
+                    continue
+
+                for _groups, tags in list(entry.items()):
+                    for group in parse_list(_groups, cast=str):
+                        if isinstance(tags, (list, tuple)):
+                            _tags = set()
+                            for e in tags:
+                                if isinstance(e, dict):
+                                    _tags |= set(e.keys())
+                                else:
+                                    _tags |= set(parse_list(e, cast=str))
+
+                            # Final assignment
+                            tags = _tags
+
+                        else:
+                            tags = set(parse_list(tags, cast=str))
+
+                        if group not in group_tags:
+                            group_tags[group] = tags
+
+                        else:
+                            group_tags[group] |= tags
+
         # include root directive
         #
         includes = result.get('include', None)
@@ -955,7 +990,7 @@ class ConfigBase(URLBase):
 
             elif isinstance(url, dict):
                 # Store the url and ignore arguments associated
-                configs.extend(u for u in url.keys())
+                configs.extend(u for u in list(url.keys()))
 
         #
         # urls root directive
@@ -1007,7 +1042,7 @@ class ConfigBase(URLBase):
                 # can at least tell the end user what entries were ignored
                 # due to errors
 
-                it = iter(url.items())
+                it = iter(list(url.items()))
 
                 # Track the URL to-load
                 _url = None
@@ -1057,14 +1092,14 @@ class ConfigBase(URLBase):
 
                         # We are a url string with additional unescaped options
                         if isinstance(entries, dict):
-                            _url, tokens = next(iter(url.items()))
+                            _url, tokens = next(iter(list(url.items())))
 
                             # Tags you just can't over-ride
                             if 'schema' in entries:
                                 del entries['schema']
 
                             # support our special tokens (if they're present)
-                            if schema in common.NOTIFY_SCHEMA_MAP:
+                            if schema in N_MGR:
                                 entries = ConfigBase._special_token_handler(
                                     schema, entries)
 
@@ -1076,7 +1111,7 @@ class ConfigBase(URLBase):
 
                 elif isinstance(tokens, dict):
                     # support our special tokens (if they're present)
-                    if schema in common.NOTIFY_SCHEMA_MAP:
+                    if schema in N_MGR:
                         tokens = ConfigBase._special_token_handler(
                             schema, tokens)
 
@@ -1110,7 +1145,7 @@ class ConfigBase(URLBase):
                 # Grab our first item
                 _results = results.pop(0)
 
-                if _results['schema'] not in common.NOTIFY_SCHEMA_MAP:
+                if _results['schema'] not in N_MGR:
                     # the arguments are invalid or can not be used.
                     ConfigBase.logger.warning(
                         'An invalid Apprise schema ({}) in YAML configuration '
@@ -1144,7 +1179,7 @@ class ConfigBase(URLBase):
                     'URL #{}: {} unpacked as:{}{}'
                     .format(no + 1, url, os.linesep, os.linesep.join(
                         ['{}="{}"'.format(k, a)
-                         for k, a in _results.items()])))
+                         for k, a in list(_results.items())])))
 
                 # Prepare our Asset Object
                 _results['asset'] = asset
@@ -1172,7 +1207,7 @@ class ConfigBase(URLBase):
             #
             # Apply our tag groups if they're defined
             #
-            for group, tags in group_tags.items():
+            for group, tags in list(group_tags.items()):
                 # Detect if anything assigned to this tag also maps back to a
                 # group.  If so we want to add the group to our list
                 if next((True for tag in results['tag']
@@ -1183,8 +1218,7 @@ class ConfigBase(URLBase):
             try:
                 # Attempt to create an instance of our plugin using the
                 # parsed URL information
-                plugin = common.\
-                    NOTIFY_SCHEMA_MAP[results['schema']](**results)
+                plugin = N_MGR[results['schema']](**results)
 
                 # Create log entry of loaded URL
                 ConfigBase.logger.debug(
@@ -1237,15 +1271,14 @@ class ConfigBase(URLBase):
         # Create a copy of our dictionary
         tokens = tokens.copy()
 
-        for kw, meta in common.NOTIFY_SCHEMA_MAP[schema]\
-                .template_kwargs.items():
+        for kw, meta in list(N_MGR[schema].template_kwargs.items()):
 
             # Determine our prefix:
             prefix = meta.get('prefix', '+')
 
             # Detect any matches
             matches = \
-                {k[1:]: str(v) for k, v in tokens.items()
+                {k[1:]: str(v) for k, v in list(tokens.items())
                  if k.startswith(prefix)}
 
             if not matches:
@@ -1257,7 +1290,7 @@ class ConfigBase(URLBase):
                 tokens[kw] = dict()
 
             # strip out processed tokens
-            tokens = {k: v for k, v in tokens.items()
+            tokens = {k: v for k, v in list(tokens.items())
                       if not k.startswith(prefix)}
 
             # Update our entries
@@ -1281,8 +1314,7 @@ class ConfigBase(URLBase):
         #
         # This function here allows these mappings to take place within the
         # YAML file as independant arguments.
-        class_templates = \
-            plugins.details(common.NOTIFY_SCHEMA_MAP[schema])
+        class_templates = plugins.details(N_MGR[schema])
 
         for key in list(tokens.keys()):
 

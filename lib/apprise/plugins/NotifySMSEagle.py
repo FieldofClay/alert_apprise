@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -268,7 +268,7 @@ class NotifySMSEagle(NotifyBase):
             # low, lo, l (for low);
             # normal, norma, norm, nor, no, n (for normal)
             # ... etc
-            result = next((key for key in SMSEAGLE_PRIORITY_MAP.keys()
+            result = next((key for key in list(SMSEAGLE_PRIORITY_MAP.keys())
                           if key.startswith(priority)), None) \
                 if priority else None
 
@@ -283,7 +283,7 @@ class NotifySMSEagle(NotifyBase):
             self.priority = SMSEAGLE_PRIORITY_MAP[result]
 
         if self.priority is not None and \
-                self.priority not in SMSEAGLE_PRIORITY_MAP.values():
+                self.priority not in list(SMSEAGLE_PRIORITY_MAP.values()):
             msg = 'An invalid SMSEagle priority ' \
                   '({}) was specified.'.format(priority)
             self.logger.warning(msg)
@@ -584,7 +584,7 @@ class NotifySMSEagle(NotifyBase):
         if self.priority is not None:
             # Store our priority; but only if it was specified
             params['priority'] = \
-                next((key for key, value in SMSEAGLE_PRIORITY_MAP.items()
+                next((key for key, value in list(SMSEAGLE_PRIORITY_MAP.items())
                       if value == self.priority),
                      default_priority)  # pragma: no cover
 

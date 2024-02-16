@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -256,9 +256,9 @@ class NotifySNS(NotifyBase):
 
             # Prepare SNS Message Payload
             payload = {
-                'Action': u'Publish',
+                'Action': 'Publish',
                 'Message': body,
-                'Version': u'2010-03-31',
+                'Version': '2010-03-31',
                 'PhoneNumber': no,
             }
 
@@ -274,8 +274,8 @@ class NotifySNS(NotifyBase):
 
             # First ensure our topic exists, if it doesn't, it gets created
             payload = {
-                'Action': u'CreateTopic',
-                'Version': u'2010-03-31',
+                'Action': 'CreateTopic',
+                'Version': '2010-03-31',
                 'Name': topic,
             }
 
@@ -293,8 +293,8 @@ class NotifySNS(NotifyBase):
 
             # Build our payload now that we know our topic_arn
             payload = {
-                'Action': u'Publish',
-                'Version': u'2010-03-31',
+                'Action': 'Publish',
+                'Version': '2010-03-31',
                 'TopicArn': topic_arn,
                 'Message': body,
             }
@@ -426,7 +426,7 @@ class NotifySNS(NotifyBase):
         #
         canonical_request = '\n'.join([
             # Method
-            u'POST',
+            'POST',
 
             # URL
             self.aws_canonical_uri,
@@ -438,10 +438,10 @@ class NotifySNS(NotifyBase):
             # All entries except characters in amazon date must be
             # lowercase
             '\n'.join(['%s:%s' % (k, v)
-                      for k, v in signed_headers.items()]) + '\n',
+                      for k, v in list(signed_headers.items())]) + '\n',
 
             # Header Entries (in same order identified above)
-            ';'.join(signed_headers.keys()),
+            ';'.join(list(signed_headers.keys())),
 
             # Payload
             sha256(payload.encode('utf-8')).hexdigest(),
@@ -463,7 +463,7 @@ class NotifySNS(NotifyBase):
                 scope=scope,
             ),
             'SignedHeaders={signed_headers}'.format(
-                signed_headers=';'.join(signed_headers.keys()),
+                signed_headers=';'.join(list(signed_headers.keys())),
             ),
             'Signature={signature}'.format(
                 signature=self.aws_auth_signature(to_sign, reference)
@@ -559,7 +559,7 @@ class NotifySNS(NotifyBase):
                         # use recursion to parse everything
                         _xml_iter(child, response)
 
-                elif root.tag in aws_keep_map.keys():
+                elif root.tag in list(aws_keep_map.keys()):
                     response[aws_keep_map[root.tag]] = (root.text).strip()
 
             # Recursivly iterate over our AWS Response to extract the

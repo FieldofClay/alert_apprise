@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -511,7 +511,7 @@ class NotifyTwitter(NotifyBase):
                         'id': attachment['media_id']
                     },
                     'additional_owners':
-                    ','.join([str(x) for x in targets.values()])
+                    ','.join([str(x) for x in list(targets.values())])
                 }
                 if no or not body:
                     # strip text and replace it with the image representation
@@ -520,7 +520,7 @@ class NotifyTwitter(NotifyBase):
                 payloads.append(_payload)
 
         for no, payload in enumerate(payloads, start=1):
-            for screen_name, user_id in targets.items():
+            for screen_name, user_id in list(targets.items()):
                 # Assign our user
                 target = payload['event']['message_create']['target']
                 target['recipient_id'] = user_id
@@ -592,7 +592,7 @@ class NotifyTwitter(NotifyBase):
         if lazy and self._user_cache:
             # Use cached response
             results = {
-                k: v for k, v in self._user_cache.items() if k in names}
+                k: v for k, v in list(self._user_cache.items()) if k in names}
 
             # limit our names if they already exist in our cache
             names = [name for name in names if name not in results]

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -375,12 +375,12 @@ class NotifySparkPost(NotifyBase):
             # Since we print our payload; attachments make it a bit too noisy
             # we just strip out the data block to accomodate it
             log_payload = \
-                {k: v for k, v in payload.items() if k != "content"}
+                {k: v for k, v in list(payload.items()) if k != "content"}
             log_payload['content'] = \
-                {k: v for k, v in payload['content'].items()
+                {k: v for k, v in list(payload['content'].items())
                  if k != "attachments"}
             log_payload['content']['attachments'] = \
-                [{k: v for k, v in x.items() if k != "data"}
+                [{k: v for k, v in list(x.items()) if k != "data"}
                  for x in payload['content']['attachments']]
         else:
             # No tidying is needed
@@ -682,10 +682,10 @@ class NotifySparkPost(NotifyBase):
         }
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Append our template tokens into our parameters
-        params.update({':{}'.format(k): v for k, v in self.tokens.items()})
+        params.update({':{}'.format(k): v for k, v in list(self.tokens.items())})
 
         # Extend our parameters
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
@@ -786,11 +786,11 @@ class NotifySparkPost(NotifyBase):
         # Add our Meta Headers that the user can provide with their outbound
         # emails
         results['headers'] = {NotifyBase.unquote(x): NotifyBase.unquote(y)
-                              for x, y in results['qsd+'].items()}
+                              for x, y in list(results['qsd+'].items())}
 
         # Add our template tokens (if defined)
         results['tokens'] = {NotifyBase.unquote(x): NotifyBase.unquote(y)
-                             for x, y in results['qsd:'].items()}
+                             for x, y in list(results['qsd:'].items())}
 
         # Get Batch Mode Flag
         results['batch'] = \

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -279,7 +279,7 @@ class NotifyOpsgenie(NotifyBase):
         self.priority = NotifyOpsgenie.template_args['priority']['default'] \
             if not priority else \
             next((
-                v for k, v in OPSGENIE_PRIORITY_MAP.items()
+                v for k, v in list(OPSGENIE_PRIORITY_MAP.items())
                 if str(priority).lower().startswith(k)),
                 NotifyOpsgenie.template_args['priority']['default'])
 
@@ -504,7 +504,7 @@ class NotifyOpsgenie(NotifyBase):
             params['tags'] = ','.join(self.__tags)
 
         # Append our details into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.details.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.details.items())})
 
         # Extend our parameters
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
@@ -566,7 +566,7 @@ class NotifyOpsgenie(NotifyBase):
 
         # Add our Meta Detail keys
         results['details'] = {NotifyBase.unquote(x): NotifyBase.unquote(y)
-                              for x, y in results['qsd+'].items()}
+                              for x, y in list(results['qsd+'].items())}
 
         # Set our priority
         if 'priority' in results['qsd'] and len(results['qsd']['priority']):

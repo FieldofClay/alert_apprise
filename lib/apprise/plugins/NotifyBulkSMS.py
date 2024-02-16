@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -176,7 +176,7 @@ class NotifyBulkSMS(NotifyBase):
         },
     })
 
-    def __init__(self, source=None, targets=None, unicode=None, batch=None,
+    def __init__(self, source=None, targets=None, str=None, batch=None,
                  route=None, **kwargs):
         """
         Initialize BulkSMS Object
@@ -204,8 +204,8 @@ class NotifyBulkSMS(NotifyBase):
             raise TypeError(msg)
 
         # Define whether or not we should set the unicode flag
-        self.unicode = self.template_args['unicode']['default'] \
-            if unicode is None else bool(unicode)
+        self.str = self.template_args['unicode']['default'] \
+            if str is None else bool(str)
 
         # Define whether or not we should operate in a batch mode
         self.batch = self.template_args['batch']['default'] \
@@ -248,7 +248,7 @@ class NotifyBulkSMS(NotifyBase):
 
         if not (self.targets or self.groups):
             # We have nothing to notify
-            self.logger.warning('There are no Twist targets to notify')
+            self.logger.warning('There are no BulkSMS targets to notify')
             return False
 
         # Send in batches if identified to do so
@@ -270,7 +270,7 @@ class NotifyBulkSMS(NotifyBase):
             'body': body,
             'routingGroup': self.route,
             'encoding': BulkSMSEncoding.UNICODE \
-            if self.unicode else BulkSMSEncoding.TEXT,
+            if self.str else BulkSMSEncoding.TEXT,
             # Options are NONE, ALL and ERRORS
             'deliveryReports': "ERRORS"
         }
@@ -390,7 +390,7 @@ class NotifyBulkSMS(NotifyBase):
 
         # Define any URL parameters
         params = {
-            'unicode': 'yes' if self.unicode else 'no',
+            'unicode': 'yes' if self.str else 'no',
             'batch': 'yes' if self.batch else 'no',
             'route': self.route,
         }

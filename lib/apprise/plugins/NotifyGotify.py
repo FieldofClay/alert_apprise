@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -172,7 +172,7 @@ class NotifyGotify(NotifyBase):
             NotifyGotify.template_args['priority']['default']
             if priority is None else
             next((
-                v for k, v in GOTIFY_PRIORITY_MAP.items()
+                v for k, v in list(GOTIFY_PRIORITY_MAP.items())
                 if str(priority).lower().startswith(k)),
                 NotifyGotify.template_args['priority']['default']))
 

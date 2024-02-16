@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -802,7 +802,7 @@ class NotifyEmail(NotifyBase):
                 base = mixed
 
             # Apply any provided custom headers
-            for k, v in self.headers.items():
+            for k, v in list(self.headers.items()):
                 base[k] = Header(v, self._get_charset(v))
 
             base['Subject'] = Header(title, self._get_charset(title))
@@ -905,7 +905,7 @@ class NotifyEmail(NotifyBase):
         params = {}
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Extend our parameters
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
@@ -1085,6 +1085,6 @@ class NotifyEmail(NotifyBase):
         # Add our Meta Headers that the user can provide with their outbound
         # emails
         results['headers'] = {NotifyBase.unquote(x): NotifyBase.unquote(y)
-                              for x, y in results['qsd+'].items()}
+                              for x, y in list(results['qsd+'].items())}
 
         return results

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -82,7 +82,7 @@ class AttachHTTP(AttachBase):
 
         # Our Query String Dictionary; we use this to track arguments
         # specified that aren't otherwise part of this class
-        self.qsd = {k: v for k, v in kwargs.get('qsd', {}).items()
+        self.qsd = {k: v for k, v in list(kwargs.get('qsd', {}).items())
                     if k not in self.template_args}
 
         return
@@ -286,7 +286,7 @@ class AttachHTTP(AttachBase):
             params['name'] = self._name
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Apply any remaining entries to our URL
         params.update(self.qsd)

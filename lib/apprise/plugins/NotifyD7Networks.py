@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -146,7 +146,7 @@ class NotifyD7Networks(NotifyBase):
     })
 
     def __init__(self, token=None, targets=None, source=None,
-                 batch=False, unicode=None, **kwargs):
+                 batch=False, str=None, **kwargs):
         """
         Initialize D7 Networks Object
         """
@@ -160,8 +160,8 @@ class NotifyD7Networks(NotifyBase):
             if not isinstance(source, str) else source.strip()
 
         # Define whether or not we should set the unicode flag
-        self.unicode = self.template_args['unicode']['default'] \
-            if unicode is None else bool(unicode)
+        self.str = self.template_args['unicode']['default'] \
+            if str is None else bool(str)
 
         # The token associated with the account
         self.token = validate_regex(token)
@@ -221,7 +221,7 @@ class NotifyD7Networks(NotifyBase):
                 'data_coding':
                 # auto is a better substitute over 'text' as text is easier to
                 # detect from a post than `unicode` is.
-                'auto' if not self.unicode else 'unicode',
+                'auto' if not self.str else 'unicode',
             }],
         }
 
@@ -338,7 +338,7 @@ class NotifyD7Networks(NotifyBase):
         # Define any URL parameters
         params = {
             'batch': 'yes' if self.batch else 'no',
-            'unicode': 'yes' if self.unicode else 'no',
+            'unicode': 'yes' if self.str else 'no',
         }
 
         if self.source:

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -483,7 +483,7 @@ class NotifyMSTeams(NotifyBase):
         # Extend our parameters
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
         # Store any template entries if specified
-        params.update({':{}'.format(k): v for k, v in self.tokens.items()})
+        params.update({':{}'.format(k): v for k, v in list(self.tokens.items())})
 
         if self.version > 1:
             return '{schema}://{team}/{token_a}/{token_b}/{token_c}/'\

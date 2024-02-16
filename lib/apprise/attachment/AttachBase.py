@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -172,7 +172,7 @@ class AttachBase(URLBase):
 
         # Validate mimetype if specified
         if self._mimetype:
-            if next((t for t in mimetypes.types_map.values()
+            if next((t for t in list(mimetypes.types_map.values())
                      if self._mimetype == t), None) is None:
                 err = 'An invalid mime-type ({}) was specified.'.format(
                     mimetype)

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -396,7 +396,7 @@ class NotifyMailgun(NotifyBase):
 
                     # tidy up any open files before we make our early
                     # return
-                    for entry in files.values():
+                    for entry in list(files.values()):
                         self.logger.trace(
                             'Closing attachment {}'.format(entry[0]))
                         entry[1].close()
@@ -443,7 +443,7 @@ class NotifyMailgun(NotifyBase):
             # already pointing there..., but it allows us to re-use the
             # attachment over and over again without closing and then
             # re-opening the same file again and again
-            for entry in files.values():
+            for entry in list(files.values()):
                 try:
                     self.logger.trace(
                         'Seeking to head of attachment {}'.format(entry[0]))
@@ -457,7 +457,7 @@ class NotifyMailgun(NotifyBase):
 
                     # tidy up any open files before we make our early
                     # return
-                    for entry in files.values():
+                    for entry in list(files.values()):
                         self.logger.trace(
                             'Closing attachment {}'.format(entry[0]))
                         entry[1].close()
@@ -491,13 +491,13 @@ class NotifyMailgun(NotifyBase):
             # in their email message.
             if self.tokens:
                 payload.update(
-                    {'v:{}'.format(k): v for k, v in self.tokens.items()})
+                    {'v:{}'.format(k): v for k, v in list(self.tokens.items())})
 
             # Store our header entries if defined into the payload
             # in their payload
             if self.headers:
                 payload.update(
-                    {'h:{}'.format(k): v for k, v in self.headers.items()})
+                    {'h:{}'.format(k): v for k, v in list(self.headers.items())})
 
             # Some Debug Logging
             self.logger.debug('Mailgun POST URL: {} (cert_verify={})'.format(
@@ -572,7 +572,7 @@ class NotifyMailgun(NotifyBase):
                 continue
 
         # Close any potential attachments that are still open
-        for entry in files.values():
+        for entry in list(files.values()):
             self.logger.trace(
                 'Closing attachment {}'.format(entry[0]))
             entry[1].close()
@@ -591,10 +591,10 @@ class NotifyMailgun(NotifyBase):
         }
 
         # Append our headers into our parameters
-        params.update({'+{}'.format(k): v for k, v in self.headers.items()})
+        params.update({'+{}'.format(k): v for k, v in list(self.headers.items())})
 
         # Append our template tokens into our parameters
-        params.update({':{}'.format(k): v for k, v in self.tokens.items()})
+        params.update({':{}'.format(k): v for k, v in list(self.tokens.items())})
 
         # Extend our parameters
         params.update(self.url_parameters(privacy=privacy, *args, **kwargs))
@@ -709,11 +709,11 @@ class NotifyMailgun(NotifyBase):
         # Add our Meta Headers that the user can provide with their outbound
         # emails
         results['headers'] = {NotifyBase.unquote(x): NotifyBase.unquote(y)
-                              for x, y in results['qsd+'].items()}
+                              for x, y in list(results['qsd+'].items())}
 
         # Add our template tokens (if defined)
         results['tokens'] = {NotifyBase.unquote(x): NotifyBase.unquote(y)
-                             for x, y in results['qsd:'].items()}
+                             for x, y in list(results['qsd:'].items())}
 
         # Get Batch Mode Flag
         results['batch'] = \

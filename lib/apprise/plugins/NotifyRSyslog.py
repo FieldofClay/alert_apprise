@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -175,7 +175,7 @@ class NotifyRSyslog(NotifyBase):
         'facility': {
             'name': _('Facility'),
             'type': 'choice:string',
-            'values': [k for k in SYSLOG_FACILITY_MAP.keys()],
+            'values': [k for k in list(SYSLOG_FACILITY_MAP.keys())],
             'default': SyslogFacility.USER,
             'required': True,
         },
@@ -360,7 +360,7 @@ class NotifyRSyslog(NotifyBase):
             # during the __init__() call. The benifit of doing this
             # check here is if we do have a valid match, we can support
             # short form matches like 'u' which will match against user
-            facility = next((f for f in SYSLOG_FACILITY_MAP.keys()
+            facility = next((f for f in list(SYSLOG_FACILITY_MAP.keys())
                              if f.startswith(facility)), facility)
 
         # Save facility if set

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -440,14 +440,14 @@ class NotifyOneSignal(NotifyBase):
             # Batches can only be sent by group (you can't combine groups into
             # a single batch)
             total_targets = 0
-            for k, m in self.targets.items():
+            for k, m in list(self.targets.items()):
                 targets = len(m)
                 total_targets += int(targets / self.batch_size) + \
                     (1 if targets % self.batch_size else 0)
             return total_targets
 
         # Normal batch count; just count the targets
-        return sum([len(m) for _, m in self.targets.items()])
+        return sum([len(m) for _, m in list(self.targets.items())])
 
     @staticmethod
     def parse_url(url):

@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -537,7 +537,7 @@ class NotifyFCM(NotifyBase):
 
         # Add our data keyword/args into our URL response
         params.update(
-            {'+{}'.format(k): v for k, v in self.data_kwargs.items()})
+            {'+{}'.format(k): v for k, v in list(self.data_kwargs.items())})
 
         reference = NotifyFCM.quote(self.project) \
             if self.mode == FCMMode.OAuth2 \

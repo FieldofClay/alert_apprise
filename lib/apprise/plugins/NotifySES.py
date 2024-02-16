@@ -2,7 +2,7 @@
 # BSD 2-Clause License
 #
 # Apprise - Push Notification Library.
-# Copyright (c) 2023, Chris Caron <lead2gold@gmail.com>
+# Copyright (c) 2024, Chris Caron <lead2gold@gmail.com>
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -619,7 +619,7 @@ class NotifySES(NotifyBase):
         #
         canonical_request = '\n'.join([
             # Method
-            u'POST',
+            'POST',
 
             # URL
             self.aws_canonical_uri,
@@ -631,10 +631,10 @@ class NotifySES(NotifyBase):
             # All entries except characters in amazon date must be
             # lowercase
             '\n'.join(['%s:%s' % (k, v)
-                      for k, v in signed_headers.items()]) + '\n',
+                      for k, v in list(signed_headers.items())]) + '\n',
 
             # Header Entries (in same order identified above)
-            ';'.join(signed_headers.keys()),
+            ';'.join(list(signed_headers.keys())),
 
             # Payload
             sha256(payload.encode('utf-8')).hexdigest(),
@@ -656,7 +656,7 @@ class NotifySES(NotifyBase):
                 scope=scope,
             ),
             'SignedHeaders={signed_headers}'.format(
-                signed_headers=';'.join(signed_headers.keys()),
+                signed_headers=';'.join(list(signed_headers.keys())),
             ),
             'Signature={signature}'.format(
                 signature=self.aws_auth_signature(to_sign, reference)
@@ -756,7 +756,7 @@ class NotifySES(NotifyBase):
                         # use recursion to parse everything
                         _xml_iter(child, response)
 
-                elif root.tag in aws_keep_map.keys():
+                elif root.tag in list(aws_keep_map.keys()):
                     response[aws_keep_map[root.tag]] = (root.text).strip()
 
             # Recursivly iterate over our AWS Response to extract the
