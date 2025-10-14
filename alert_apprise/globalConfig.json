@@ -1,0 +1,87 @@
+{
+    "pages": {
+        "configuration": {
+            "tabs": [
+                {
+                    "name": "settings",
+                    "title": "Settings",
+                    "entity": [
+                        {
+                            "type": "text",
+                            "label": "Configuration File",
+                            "field": "config_file",
+                            "help": "Path to the configuration file for Apprise.",
+                            "required": false,
+                            "defaultValue": "",
+                            "validators": [
+                                {
+                                    "type": "string",
+                                    "minLength": 0,
+                                    "maxLength": 8192
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "loggingTab"
+                }
+            ],
+            "title": "Configuration",
+            "description": "Set up Apprise Alert Action"
+        }
+    },
+    "alerts": [
+        {
+            "name": "alert_apprise",
+            "label": "Send an Apprise Alert",
+            "description": "Send an alert using Apprise",
+            "entity": [
+                {
+                    "type": "text",
+                    "label": "URL",
+                    "field": "url",
+                    "defaultValue": "",
+                    "required": false,
+                    "help": "URL of the service to be called. Only required if not using a tag. See https://github.com/caronc/apprise/wiki for further info."
+                },
+                {
+                    "type": "text",
+                    "label": "Tag",
+                    "field": "tag",
+                    "defaultValue": "",
+                    "required": false,
+                    "help": "Tag of the service(s) from your configuration file to call. Only required if not using a URL."
+                },
+                {
+                    "type": "text",
+                    "label": "Body",
+                    "field": "body",
+                    "defaultValue": "",
+                    "required": true,
+                    "help": "Body of the alert."
+                },
+                {
+                    "type": "text",
+                    "label": "Title",
+                    "field": "title",
+                    "defaultValue": "",
+                    "required": false,
+                    "help": "Title of the alert."
+                }
+            ]
+        }
+    ],
+    "meta": {
+        "name": "alert_apprise",
+        "restRoot": "alert_apprise",
+        "version": "2.0.0",
+        "displayName": "Apprise Alert Action",
+        "hideUCCVersion": true,
+        "schemaVersion": "0.0.10",
+        "supportedThemes": [
+            "light",
+            "dark"
+        ]
+    }
+}

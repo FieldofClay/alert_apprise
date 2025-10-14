@@ -1,2 +1,6 @@
-local
-metadata/local.meta
+.pytest_cache
+.venv
+__pycache__
+output
+*.tar.gz
+.coverage

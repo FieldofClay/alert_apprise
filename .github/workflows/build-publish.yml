@@ -1,0 +1,51 @@
+name: Build and Publish
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  build_and_push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Extract Tag Name
+        id: extract_tag
+        run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install UCC
+        run: pip install splunk-add-on-ucc-framework
+      
+      - name: Build
+        run: ucc-gen build --source alert_apprise/package --ta-version ${{ env.TAG_NAME }}
+      
+      - name: Package
+        run: ucc-gen package --path output/alert_apprise
+      
+      - name: Upload to GitHub Releases
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ./output/alert_apprise-${{ env.TAG_NAME }}.tar.gz
+          asset_name: alert_apprise-${{ env.TAG_NAME }}.tar.gz
+          asset_content_type: application/gzip
+      
+      - name: Publish to Splunkbase
+        run: |
+          ucc-gen publish \
+            --package-path alert_apprise-${{ env.TAG_NAME }}.tar.gz \
+            --username ${{ secrets.SPLUNKBASE_USERNAME }} \
+            --password ${{ secrets.SPLUNKBASE_PASSWORD }} \
+            --app-id ${{ vars.SPLUNKBASE_APP_ID }} \
+            --splunk-versions ${{ vars.SPLUNK_VERSIONS }} \
+            --cim-versions ${{ vars.CIM_VERSIONS }}
