@@ -1,9 +1,0 @@
-<setup>
-    <block title="Apprise Configuration File" endpoint="admin/alert_actions" entity="apprise_alert">
-        <input field="param.config">
-            <label>Config File</label>
-            <type>text</type>
-        </input>
-    </block>
-
-</setup>
