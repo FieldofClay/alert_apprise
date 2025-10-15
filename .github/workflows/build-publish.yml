@@ -31,14 +31,9 @@ jobs:
         run: ucc-gen package --path output/alert_apprise
       
       - name: Upload to GitHub Releases
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ./alert_apprise-${{ env.TAG_NAME }}.tar.gz
-          asset_name: alert_apprise-${{ env.TAG_NAME }}.tar.gz
-          asset_content_type: application/gzip
+          files: alert_apprise-${{ env.TAG_NAME }}.tar.gz
       
       - name: Publish to Splunkbase
         run: |
