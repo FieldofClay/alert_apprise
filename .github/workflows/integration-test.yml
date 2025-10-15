@@ -58,77 +58,12 @@ jobs:
           SPLUNK_VERSION: ${{ matrix.splunk_version }}
         run: |
           cd alert_apprise/tests/integration
-          
-          echo "Starting services with Splunk version: $SPLUNK_VERSION"
           docker compose up -d
           
-          echo "✅ Services started"
-          docker compose ps
-      
-      - name: Wait for Splunk to be ready
-        run: |
-          cd alert_apprise/tests/integration
-          
-          echo "Waiting for Splunk to start (this may take 2-3 minutes)..."
-          
-          timeout 300 bash -c 'until docker compose exec -T splunk curl -f http://localhost:8000 2>/dev/null; do 
-            echo -n "."
-            sleep 5
-          done' || {
-            echo ""
-            echo "❌ Timeout waiting for Splunk"
-            echo ""
-            echo "=== Container Status ==="
-            docker compose ps
-            echo ""
-            echo "=== Splunk Logs ==="
-            docker compose logs splunk
-            exit 1
-          }
-          
-          echo ""
-          echo "✅ Splunk is ready"
-          
-          # Give scheduler a moment to start
-          echo "Waiting additional 30s for scheduler to initialize..."
-          sleep 30
-      
       - name: Verify webhook delivery
         run: |
           cd alert_apprise/tests/integration
-          
-          # Run verification script (waits up to 90 seconds)
-          ./verify.sh 90
-      
-      - name: Upload test artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: integration-test-logs-splunk-${{ matrix.splunk_version }}
-          path: |
-            alert_apprise/tests/integration/nginx/webhook_logs/
-          retention-days: 7
-      
-      - name: Show logs on failure
-        if: failure()
-        run: |
-          cd alert_apprise/tests/integration
-          
-          echo ""
-          echo "=== Container Status ==="
-          docker compose ps
-          
-          echo ""
-          echo "=== Nginx Logs ==="
-          docker compose logs nginx
-          
-          echo ""
-          echo "=== Splunk Logs (last 100 lines) ==="
-          docker compose logs --tail=100 splunk
-          
-          echo ""
-          echo "=== Webhook Logs ==="
-          cat nginx/webhook_logs/access.log 2>/dev/null || echo "No webhook logs found"
+          ./verify.sh 180
       
       - name: Cleanup
         if: always()
