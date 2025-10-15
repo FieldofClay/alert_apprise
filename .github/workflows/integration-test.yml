@@ -60,10 +60,10 @@ jobs:
           cd alert_apprise/tests/integration
           
           echo "Starting services with Splunk version: $SPLUNK_VERSION"
-          docker-compose up -d
+          docker compose up -d
           
           echo "✅ Services started"
-          docker-compose ps
+          docker compose ps
       
       - name: Wait for Splunk to be ready
         run: |
@@ -71,7 +71,7 @@ jobs:
           
           echo "Waiting for Splunk to start (this may take 2-3 minutes)..."
           
-          timeout 300 bash -c 'until docker-compose exec -T splunk curl -f http://localhost:8000 2>/dev/null; do 
+          timeout 300 bash -c 'until docker compose exec -T splunk curl -f http://localhost:8000 2>/dev/null; do 
             echo -n "."
             sleep 5
           done' || {
@@ -79,10 +79,10 @@ jobs:
             echo "❌ Timeout waiting for Splunk"
             echo ""
             echo "=== Container Status ==="
-            docker-compose ps
+            docker compose ps
             echo ""
             echo "=== Splunk Logs ==="
-            docker-compose logs splunk
+            docker compose logs splunk
             exit 1
           }
           
@@ -116,15 +116,15 @@ jobs:
           
           echo ""
           echo "=== Container Status ==="
-          docker-compose ps
+          docker compose ps
           
           echo ""
           echo "=== Nginx Logs ==="
-          docker-compose logs nginx
+          docker compose logs nginx
           
           echo ""
           echo "=== Splunk Logs (last 100 lines) ==="
-          docker-compose logs --tail=100 splunk
+          docker compose logs --tail=100 splunk
           
           echo ""
           echo "=== Webhook Logs ==="
@@ -134,7 +134,7 @@ jobs:
         if: always()
         run: |
           cd alert_apprise/tests/integration
-          docker-compose down -v
+          docker compose down -v
           
           # Clean up log files
           rm -rf nginx/webhook_logs/*.log

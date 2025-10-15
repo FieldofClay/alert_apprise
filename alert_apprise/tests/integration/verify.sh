@@ -31,21 +31,21 @@ while true; do
         fi
         echo ""
         echo "=== Docker Container Status ==="
-        docker-compose ps
+        docker compose ps
         echo ""
         echo "=== Splunk Logs (last 50 lines) ==="
-        docker-compose logs --tail=50 splunk
+        docker compose logs --tail=50 splunk
         exit 1
     fi
     
     if [ -f "$LOG_FILE" ]; then
         # Check if the log contains our test alert
-        if grep -q "Integration test alert" "$LOG_FILE"; then
+        if grep -q "Test Alert Body" "$LOG_FILE"; then
             echo ""
             echo "✅ SUCCESS: Webhook received!"
             echo ""
             echo "=== Webhook Details ==="
-            grep "Integration test alert" "$LOG_FILE"
+            grep "Test Alert Body" "$LOG_FILE"
             echo ""
             echo "=== Full Access Log ==="
             cat "$LOG_FILE"
