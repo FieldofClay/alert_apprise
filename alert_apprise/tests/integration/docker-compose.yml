@@ -1,0 +1,33 @@
+services:
+  webhook-receiver:
+    image: mccutchen/go-httpbin:latest
+    container_name: webhook-receiver
+    networks:
+      - splunk-net
+
+  splunk:
+    image: splunk/splunk:10.0 #${SPLUNK_VERSION}
+    container_name: splunk
+    environment:
+      SPLUNK_START_ARGS: --accept-license
+      SPLUNK_GENERAL_TERMS: --accept-sgt-current-at-splunk-com
+      SPLUNK_PASSWORD: who_rocks?
+    volumes:
+      - ../../../output/alert_apprise:/opt/splunk/etc/apps/alert_apprise
+      - ./splunk_config/savedsearches.conf:/opt/splunk/etc/apps/test_alert/local/savedsearches.conf
+    ports:
+      - 8000:8000
+    networks:
+      - splunk-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 120s
+    depends_on:
+      - webhook-receiver
+
+networks:
+  splunk-net:
+    driver: bridge
