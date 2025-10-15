@@ -1,0 +1,140 @@
+name: Integration Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  prepare-versions:
+    runs-on: ubuntu-latest
+    outputs:
+      versions: ${{ steps.set-versions.outputs.versions }}
+    steps:
+      - name: Create version list
+        id: set-versions
+        run: |
+          VERSIONS="${{ vars.SPLUNK_VERSIONS }}"
+          
+          # Convert comma-separated to JSON array
+          JSON_ARRAY=$(echo "$VERSIONS" | jq -R -c 'split(",") | map(gsub("^\\s+|\\s+$";""))')
+          echo "versions=$JSON_ARRAY" >> $GITHUB_OUTPUT
+          echo "Testing Splunk versions: $JSON_ARRAY"
+
+  integration-test:
+    needs: prepare-versions
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        splunk_version: ${{ fromJson(needs.prepare-versions.outputs.versions) }}
+    
+    name: Integration Test (Splunk ${{ matrix.splunk_version }})
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      
+      - name: Install UCC Framework
+        run: pip install splunk-add-on-ucc-framework
+      
+      - name: Build add-on
+        run: ucc-gen build --source alert_apprise/package --ta-version 0.0.1-test
+      
+      - name: Prepare test environment
+        run: |
+          cd alert_apprise/tests/integration
+          
+          mkdir -p nginx/webhook_logs
+          chmod 777 nginx/webhook_logs
+      
+      - name: Start Docker services
+        env:
+          SPLUNK_VERSION: ${{ matrix.splunk_version }}
+        run: |
+          cd alert_apprise/tests/integration
+          
+          echo "Starting services with Splunk version: $SPLUNK_VERSION"
+          docker-compose up -d
+          
+          echo "✅ Services started"
+          docker-compose ps
+      
+      - name: Wait for Splunk to be ready
+        run: |
+          cd alert_apprise/tests/integration
+          
+          echo "Waiting for Splunk to start (this may take 2-3 minutes)..."
+          
+          timeout 300 bash -c 'until docker-compose exec -T splunk curl -f http://localhost:8000 2>/dev/null; do 
+            echo -n "."
+            sleep 5
+          done' || {
+            echo ""
+            echo "❌ Timeout waiting for Splunk"
+            echo ""
+            echo "=== Container Status ==="
+            docker-compose ps
+            echo ""
+            echo "=== Splunk Logs ==="
+            docker-compose logs splunk
+            exit 1
+          }
+          
+          echo ""
+          echo "✅ Splunk is ready"
+          
+          # Give scheduler a moment to start
+          echo "Waiting additional 30s for scheduler to initialize..."
+          sleep 30
+      
+      - name: Verify webhook delivery
+        run: |
+          cd alert_apprise/tests/integration
+          
+          # Run verification script (waits up to 90 seconds)
+          ./verify.sh 90
+      
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: integration-test-logs-splunk-${{ matrix.splunk_version }}
+          path: |
+            alert_apprise/tests/integration/nginx/webhook_logs/
+          retention-days: 7
+      
+      - name: Show logs on failure
+        if: failure()
+        run: |
+          cd alert_apprise/tests/integration
+          
+          echo ""
+          echo "=== Container Status ==="
+          docker-compose ps
+          
+          echo ""
+          echo "=== Nginx Logs ==="
+          docker-compose logs nginx
+          
+          echo ""
+          echo "=== Splunk Logs (last 100 lines) ==="
+          docker-compose logs --tail=100 splunk
+          
+          echo ""
+          echo "=== Webhook Logs ==="
+          cat nginx/webhook_logs/access.log 2>/dev/null || echo "No webhook logs found"
+      
+      - name: Cleanup
+        if: always()
+        run: |
+          cd alert_apprise/tests/integration
+          docker-compose down -v
+          
+          # Clean up log files
+          rm -rf nginx/webhook_logs/*.log
