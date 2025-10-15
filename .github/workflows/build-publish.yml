@@ -43,7 +43,7 @@ jobs:
           ucc-gen publish \
             --package-path alert_apprise-${{ env.TAG_NAME }}.tar.gz \
             --username ${{ secrets.SPLUNKBASE_USERNAME }} \
-            --password ${{ secrets.SPLUNKBASE_PASSWORD }} \
+            --password "${{ secrets.SPLUNKBASE_PASSWORD }}" \
             --app-id ${{ vars.SPLUNKBASE_APP_ID }} \
             --splunk-versions ${{ vars.SPLUNK_VERSIONS }} \
             --cim-versions ${{ vars.CIM_VERSIONS }}
