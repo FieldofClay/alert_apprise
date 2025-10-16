@@ -50,13 +50,6 @@ jobs:
       - name: Build add-on
         run: ucc-gen build --source alert_apprise/package --ta-version 0.0.1-test
       
-      - name: Prepare test environment
-        run: |
-          cd alert_apprise/tests/integration
-          
-          mkdir -p nginx/webhook_logs
-          chmod 777 nginx/webhook_logs
-      
       - name: Start Docker services
         env:
           SPLUNK_VERSION: ${{ matrix.splunk_version }}
