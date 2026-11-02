@@ -1,4 +1,4 @@
 splunktaucclib
 splunk-sdk
 solnlib
-apprise==2.0.1
+apprise==2.1.0
